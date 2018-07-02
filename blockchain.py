@@ -2,6 +2,7 @@ import hashlib as hasher
 import datetime as date
 import string
 import itertools
+import pytest
 
 class Block:
     def __init__(self, index, timestamp, data, previous_hash):
@@ -41,17 +42,31 @@ number_of_blocks = 19
 def create_blockchain():
     blockchain = [create_genesis_block()]
     for index in itertools.count():
-        data = yield
-        block = next_block(blockchain[index])
-        yield block.hash
-        blockchain.append(block)
+        data = (yield)
+        print('data: '+str(data))
+        if data != 'chain':
+            if data != 'q':
+                myblock = Block(blockchain[index].index, date.datetime.now(), data, blockchain[index].hash)
+                block = next_block(myblock)
+            else:
+                block = next_block(blockchain[index])
+            blockchain.append(block)
+            yield block.hash
+        else:
+            yield blockchain
 
-blockchain = create_blockchain()
-x = input()
-next(blockchain)
-res = 0
-while x == 'q':
-    res = blockchain.send(res)
-    next(blockchain)
-    print(res)
+
+if __name__ == "__main__":
+    blockchain = create_blockchain()
     x = input()
+    next(blockchain)
+    res = 0
+    while x != '':
+        if x == 'q':
+            res = blockchain.send(res)
+        else:
+            res = blockchain.send(x)
+        next(blockchain)
+        print(res)
+        x = input()
+
